@@ -1,5 +1,61 @@
-.venv/
+# ========================
+# OS & Editor files
+# ========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+
+# ========================
+# Python
+# ========================
 __pycache__/
 *.pyc
-.DS_Store
+*.pyo
+*.pyd
+*.pkl
+*.egg-info/
 .env
+venv/
+.envrc
+.venv/
+.ipynb_checkpoints/
+
+# ========================
+# Jupyter / Notebooks
+# ========================
+.ipynb_checkpoints
+*.nbconvert.ipynb
+
+# ========================
+# Node.js (just in case you use JS tooling)
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================
+# Build / Output
+# ========================
+dist/
+build/
+*.egg
+*.out
+*.log
+
+# ========================
+# Excel / Financial Modeling
+# ========================
+~$*.xls*     # temporary Excel lock files
+*.bak        # backups
+*.tmp        # temp files
+*.cache
+
+# ========================
+# IDEs / Config
+# ========================
+.vscode/
+.idea/
+*.iml

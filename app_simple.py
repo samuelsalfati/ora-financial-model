@@ -2052,9 +2052,10 @@ try:
                 - **AI-Assisted Monitoring**: Reduces nurse workload by 70%
                 
                 **Device Economics:**
-                - Initial device cost offset by TCM billing (99495/99496)
+                - Device cost: $300 (12-month depreciation)
+                - TCM billing offset: ~$193.50 per new patient
                 - 85% recovery rate from discharged patients
-                - Net effective cost: ~$66 per patient after recovery
+                - Net monthly cost: ~$30/patient amortized
                 """)
             
             cost_assumptions = pd.DataFrame({
@@ -2063,15 +2064,19 @@ try:
                     'Support Staff Ratio',
                     'Staff Cost PMPM',
                     'Device Cost (gross)',
+                    'TCM Offset',
                     'Device Cost (net)',
+                    'Monthly Amortized',
                     'Platform PMPM'
                 ],
                 'Value': [
                     '1:350 patients',
                     '1:333 patients',
                     '$41.79 total',
-                    '$185',
-                    '$66 after recovery',
+                    '$300',
+                    '$193.50 avg',
+                    '$106.50 after TCM',
+                    '$30/patient/month',
                     '$5-30 tiered'
                 ]
             })
@@ -2087,11 +2092,11 @@ try:
         with col1:
             st.metric("Revenue/Patient", "$241/mo", help="Average monthly revenue per patient")
         with col2:
-            st.metric("Cost/Patient", "$70/mo", help="Staffing $42 + Platform $15 + Device $5.50 + Overhead $8")
+            st.metric("Cost/Patient", "$74/mo", help="Staffing $42 + Platform $15 + Device $9 + Overhead $8")
         with col3:
-            st.metric("Gross Margin", "$171/mo", help="Per-patient monthly gross margin")
+            st.metric("Gross Margin", "$167/mo", help="Per-patient monthly gross margin")
         with col4:
-            st.metric("Margin %", "71%", help="Gross margin percentage at scale")
+            st.metric("Margin %", "69%", help="Gross margin percentage at scale")
         
         st.subheader("Device Economics & TCM Offset")
         col_device1, col_device2 = st.columns(2)
@@ -2099,19 +2104,21 @@ try:
         with col_device1:
             st.info("""
             **Initial Device Financing**
-            - New device cost: $185
-            - TCM billing (99495): $192.50
-            - TCM high complexity (99496): $260
-            - **Net: Device cost fully covered by TCM**
+            - New device cost: $300
+            - TCM billing (99495): $192.50 (60% of patients)
+            - TCM high complexity (99496): $260 (30% of patients)
+            - Average TCM revenue: $193.50/patient
+            - **Net device cost: $106.50 after TCM offset**
             """)
         
         with col_device2:
             st.success("""
             **Long-term Economics**
             - 85% device recovery rate
-            - $45 refurbishment cost
-            - Effective cost: $66/patient
-            - **ROI: 3-4x on device investment**
+            - $50 refurbishment cost
+            - 12-month depreciation schedule
+            - Monthly amortized: ~$30/patient
+            - **Break-even: Month 4 after TCM offset**
             """)
         
         st.markdown("---")

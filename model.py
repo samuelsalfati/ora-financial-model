@@ -26,7 +26,7 @@ def default_vendor_presets():
             tiers=[(0, 15.0), (501, 22.0), (2001, 30.0)],   # More realistic vendor pricing
             flat_pmpm=None,
             monthly_software_fee=2000.0,                   # EDITABLE
-            hardware_kits={"Kit-300": 300.0, "Kit-400": 400.0, "Kit-500": 500.0},  # EDITABLE
+            hardware_kits={"Kit-300": 300.0, "Kit-400": 400.0, "Kit-500": 500.0},  # Device costs
             dev_capex=0.0,
         ),
         "CareSimple": VendorConfig(
@@ -34,7 +34,7 @@ def default_vendor_presets():
             tiers=None,
             flat_pmpm=15.0,                                # EDITABLE in UI
             monthly_software_fee=2000.0,                   # EDITABLE
-            hardware_kits={"Kit-300": 300.0, "Kit-400": 400.0, "Kit-500": 500.0},  # EDITABLE
+            hardware_kits={"Kit-300": 300.0, "Kit-400": 400.0, "Kit-500": 500.0},  # Device costs
             dev_capex=0.0,
         ),
         "Ora": VendorConfig(
@@ -42,7 +42,7 @@ def default_vendor_presets():
             tiers=None,
             flat_pmpm=5.0,                                 # EDITABLE
             monthly_software_fee=0.0,                      # EDITABLE
-            hardware_kits={"Ora-Std": 185.0},              # EDITABLE
+            hardware_kits={"Ora-Std": 300.0},              # Updated device cost from $185 to $300
             dev_capex=250_000.0,                           # EDITABLE
         ),
     }
@@ -215,6 +215,8 @@ def default_settings():
         "device_recovery_rate": 0.85,    # 85% of devices recovered when patient leaves
         "device_refurb_cost": 50,        # Cost to refurbish recovered device
         "device_logistics_cost": 25,     # Shipping/logistics per device (both ways)
+        "device_depreciation_months": 12, # Devices depreciate over 12 months (fast depreciation)
+        "device_useful_life": 24,        # Devices last 24 months before replacement needed
         "vendor_selected_kit": {         # hardware kit selection per vendor (aggressive $300 pricing)
             "Impilo": "Kit-300",
             "CareSimple": "Kit-300", 
@@ -607,14 +609,23 @@ def run_projection(
                 net_new_devices = max(0, new_pts - recovered_devices)
                 
                 # Hardware costs breakdown:
-                # 1. New devices for net new patients
-                # 2. Refurbishment for recovered devices
-                # 3. Logistics for all device movements
-                new_device_cost = kit_cost * net_new_devices
-                refurb_costs = refurb_cost * min(recovered_devices, new_pts)  # Only refurb what we'll reuse
-                logistics_costs = logistics_cost * (new_pts + attrition_pts)  # Ship to new patients + retrieve from leaving
+                # 1. New devices for net new patients ($300 each)
+                # 2. Refurbishment for recovered devices ($50 each)
+                # 3. Logistics for all device movements ($25 each way)
+                # 4. TCM offset: ~$193.50 per new patient from TCM billing
                 
-                hardware = new_device_cost + refurb_costs + logistics_costs
+                # Calculate gross device costs
+                new_device_cost = kit_cost * net_new_devices  # $300 per new device
+                refurb_costs = refurb_cost * min(recovered_devices, new_pts)  # $50 per refurb
+                logistics_costs = logistics_cost * (new_pts + attrition_pts)  # $25 per movement
+                
+                # TCM offset calculation (billed in revenue, offset here for unit economics)
+                # 60% get $192.50 (99495) + 30% get $260 (99496) = avg $193.50 per new patient
+                tcm_offset = new_pts * 193.50 * util["collection_rate"]  # TCM revenue offsets device cost
+                
+                # Net hardware cost after TCM offset
+                hardware_gross = new_device_cost + refurb_costs + logistics_costs
+                hardware = max(0, hardware_gross - tcm_offset)  # Net cost after TCM offset
                 
                 # Charge software fee once per month (company-wide)
                 software_fee = 0.0

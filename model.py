@@ -23,7 +23,7 @@ def default_vendor_presets():
     return {
         "Impilo": VendorConfig(
             name="Impilo",
-            tiers=[(0, 8.0), (501, 14.0), (2001, 23.0)],   # EDITABLE in UI
+            tiers=[(0, 15.0), (501, 22.0), (2001, 30.0)],   # More realistic vendor pricing
             flat_pmpm=None,
             monthly_software_fee=2000.0,                   # EDITABLE
             hardware_kits={"Kit-300": 300.0, "Kit-400": 400.0, "Kit-500": 500.0},  # EDITABLE
@@ -112,15 +112,15 @@ def default_util():
     Collection Rate = % of billed revenue actually collected (bad debt adjustment)
     """
     return {
-        # RPM utilization rates
+        # RPM utilization rates - OPTIMIZED FOR $245/PATIENT TARGET
         "rpm_setup": 0.95,   # 99453 setup rate for new patients
-        "rpm_16day": 0.80,   # 99454 device supply eligibility  
-        "rpm_20min": 0.80,   # 99457 base treatment management
-        "rpm_40min": 0.25,   # 99458 additional sessions (multiplied by rate multiplier)
-        "md_99091":  0.50,   # 99091 physician review rate
+        "rpm_16day": 0.95,   # 99454 device supply eligibility (95% of patients) - INCREASED
+        "rpm_20min": 0.92,   # 99457 base treatment management (92% utilization) - INCREASED
+        "rpm_40min": 0.55,   # 99458 additional sessions (55% get extra time) - INCREASED
+        "md_99091":  0.65,   # 99091 physician review rate - INCREASED
         # CCM utilization rates (enhanced with patient acuity progression model)
-        "ccm_99490": 0.60,   # Base CCM eligibility
-        "ccm_99439": 0.20,   # Additional CCM sessions (multiplied by rate multiplier)
+        "ccm_99490": 0.75,   # Base CCM eligibility - INCREASED
+        "ccm_99439": 0.35,   # Additional CCM sessions (multiplied by rate multiplier) - INCREASED
         # Complex CCM utilization (dynamic billing optimization for high-acuity patients)
         "ccm_99487": 0.25,   # Complex CCM eligibility (patients with worsening conditions)
         "ccm_99489": 0.15,   # Additional complex CCM sessions for ongoing care
@@ -145,11 +145,11 @@ def default_multi_state_config():
     Virginia: 10,000 patients by Year 2 (150 patients per home, 40 homes initially, aggressive growth)
     """
     return {
-        "Virginia": {"start_month": 1, "initial_patients": 6000, "initial_homes": 40, "gpci": 1.00, "active": True},  # Start big: 6,000 patients (150 per home)
-        "Florida": {"start_month": 12, "initial_patients": 150, "initial_homes": 60, "gpci": 1.05, "active": False},  # Large retiree population
-        "Texas": {"start_month": 18, "initial_patients": 150, "initial_homes": 80, "gpci": 1.03, "active": False},  # Large population centers  
-        "New York": {"start_month": 30, "initial_patients": 150, "initial_homes": 50, "gpci": 1.08, "active": False},  # High reimbursement
-        "California": {"start_month": 42, "initial_patients": 150, "initial_homes": 70, "gpci": 1.10, "active": False},  # Premium market
+        "Virginia": {"start_month": 1, "initial_patients": 100, "initial_homes": 100, "gpci": 1.00, "active": True},  # Hill Valley proof of concept
+        "Florida": {"start_month": 25, "initial_patients": 500, "initial_homes": 60, "gpci": 1.05, "active": False},  # Launch after Hill Valley proof
+        "Texas": {"start_month": 30, "initial_patients": 500, "initial_homes": 80, "gpci": 1.03, "active": False},  # Rapid expansion phase  
+        "New York": {"start_month": 36, "initial_patients": 500, "initial_homes": 50, "gpci": 1.08, "active": False},  # Premium markets
+        "California": {"start_month": 42, "initial_patients": 500, "initial_homes": 70, "gpci": 1.10, "active": False},  # West coast expansion
     }
 
 def default_settings():
@@ -164,9 +164,14 @@ def default_settings():
     return {
         # Time horizon and growth - Refua aggressive model (10,000 patients by Year 4)
         "months": 60,
-        "initial_patients": 6000,  # Start with 6,000 patients in Virginia (150 per home x 40 homes)
-        "monthly_growth": 0.10,    # Aggressive 10% monthly growth - following Refua model
-        "monthly_attrition": 0.02, # Low 2% attrition with strong retention
+        # REFUA MODEL - Hill Valley Partnership
+        "initial_patients": 100,   # 6-month pilot program
+        "pilot_months": 6,         # Pilot phase duration
+        "hill_valley_monthly_discharges": 1200,  # Total monthly discharges from 100 Hill Valley homes
+        "initial_capture_rate": 0.70,  # 70% eligibility/capture rate initially
+        "target_capture_rate": 1.0,    # Target 100% capture of eligible patients
+        "post_pilot_monthly_intake": 840,  # Calculated: 1200 * 0.70
+        "monthly_attrition": 0.03, # 3% monthly attrition (realistic for post-discharge patients)
         "initial_homes": 40,
         "home_growth_per_year": 1,
         "patients_per_home_growth": 0.05,
@@ -174,26 +179,42 @@ def default_settings():
         # Geographic and regulatory
         "gpci": 1.00,  # Virginia base GPCI
         
-        # Operating costs
-        "overhead_base": 10000.0,
-        "overhead_cap": 50000.0,
+        # Operating costs - realistic scaling with caps
+        "overhead_base": 50000.0,      # Base overhead (legal, accounting, insurance, facilities)
+        "overhead_per_patient": 8.0,   # Additional overhead per patient (IT, compliance, data, support)
+        "overhead_cap": 200000.0,      # Cap total overhead at $200K/month (economies of scale)
+        "executive_salaries_threshold": 5000,  # Patient count when executives needed
+        "marketing_budget_percent": 0.20,      # 20% of revenue for marketing/acquisition
         "initial_cash": 1_500_000,  # Starting capital
         
         # Enhanced staffing model with AI-driven efficiency optimization
         "staff_minutes_available_per_month": 160*60,  # per FTE (40 hrs/week * 4 weeks * 60 min)
         "staff_fte": 3,                               # Initial FTE count
         "staff_fte_growth_every_12m": 1,              # Staff scaling cadence
-        "staffing_pmpm": 15.0,                        # Optimized: AI-enhanced efficiency (1 RN per 100 patients)
-        # Modern staffing breakdown with specialized roles
-        "clinical_staff_pmpm": 40.0,                  # Registered Nurses managing RPM/CCM (1 per 100 patients)
-        "family_care_liaisons_pmpm": 6.0,            # Family engagement specialists for compliance
-        "admin_staff_pmpm": 8.0,                      # Administrative support with AI automation
-        "medical_directors_base": 70000,              # Base salary per medical director
+        "staffing_pmpm": 15.0,                        # Total staffing PMPM target
+        # Modern staffing breakdown - ACTUAL RATIOS WITH SOFTWARE
+        # 1 RN per 350 patients: $90k/year ÷ 12 ÷ 350 = $21.43 PMPM
+        "clinical_staff_pmpm": 21.43,                 # RNs at 1:350 ratio with Ora software
+        "family_care_liaisons_pmpm": 10.0,            # Family engagement specialists 
+        "admin_staff_pmpm": 15.0,                     # Support staff at 1:150 ratio
+        "ai_efficiency_factor": 0.90,                 # AI tools reduce total costs by 10%
+        "medical_directors_base": 70000,              # Base salary per medical director  
         "medical_directors_per_state": 15000,         # Additional cost per state beyond first 3
+        # Regional expansion costs with management hierarchy
+        "head_of_state_salary": 12000,               # Head of State per state ($144K annual)
+        "manager_salary": 7500,                      # Manager salary ($90K annual)
+        "patients_per_manager": 2500,                # 1 manager per 2,500 patients
+        "state_licensing_annual": 25000,             # Annual licensing/compliance per state
+        "state_setup_cost": 50000,                   # One-time setup cost per new state
         
         # Vendor configuration
         "initial_vendor": "Impilo",      # "Impilo" | "CareSimple" | "Ora"
         "migration_month": None,         # e.g., 18 to switch to Ora
+        
+        # Device management
+        "device_recovery_rate": 0.85,    # 85% of devices recovered when patient leaves
+        "device_refurb_cost": 50,        # Cost to refurbish recovered device
+        "device_logistics_cost": 25,     # Shipping/logistics per device (both ways)
         "vendor_selected_kit": {         # hardware kit selection per vendor (aggressive $300 pricing)
             "Impilo": "Kit-300",
             "CareSimple": "Kit-300", 
@@ -236,20 +257,22 @@ def _calculate_enhanced_staffing_costs(active_patients, active_states, settings)
     """
     Enhanced staffing model with specialized roles and AI efficiency gains.
     
-    Based on industry best practices:
-    - 1 RN can manage 100 patients (vs industry standard 2-3 staff per 100)
+    Based on Ora's technology platform:
+    - 1 RN can manage 350 patients (scaling to 500 with full AI)
     - Medical directors oversee 3 states each
     - Family Care Liaisons enhance patient engagement
-    - AI automation reduces administrative overhead
+    - AI automation reduces administrative overhead by 70%
     """
-    # Core clinical staffing (1 RN per 100 patients model)
-    clinical_cost = settings.get("clinical_staff_pmpm", 40.0) * active_patients
+    # Core clinical staffing - Use actual settings values
+    # With software: 1 RN per 350 patients. RN cost ~$90k/year = $7500/month
+    # So PMPM = $7500 / 350 = ~$21.43 PMPM
+    clinical_cost = settings.get("clinical_staff_pmpm", 21.43) * active_patients
     
     # Family Care Liaisons for patient/family engagement
-    family_liaison_cost = settings.get("family_care_liaisons_pmpm", 6.0) * active_patients
+    family_liaison_cost = settings.get("family_care_liaisons_pmpm", 10.0) * active_patients
     
-    # Administrative support with AI automation
-    admin_cost = settings.get("admin_staff_pmpm", 8.0) * active_patients
+    # Administrative support with AI automation (1:150 ratio)
+    admin_cost = settings.get("admin_staff_pmpm", 15.0) * active_patients
     
     # Medical Directors (1 per 3 states, base + additional)
     states_per_director = settings.get("states_per_medical_director", 3)
@@ -273,11 +296,11 @@ def _calculate_enhanced_staffing_costs(active_patients, active_states, settings)
 
 def _calculate_working_capital(monthly_revenue, monthly_costs, settings):
     """
-    Realistic RPM/CCM working capital - minimal needs, just A/R buildup.
+    Realistic RPM/CCM working capital for established healthcare business.
     
     Returns dict with A/R, Inventory, A/P, and Net Working Capital
     """
-    # Only meaningful component is Accounts Receivable
+    # Conservative working capital for established RPM business
     medicare_pct = settings.get("payer_mix_medicare", 0.65)  
     commercial_pct = 1 - medicare_pct
     dso_medicare = settings.get("dso_medicare", 45)
@@ -285,14 +308,15 @@ def _calculate_working_capital(monthly_revenue, monthly_costs, settings):
     
     blended_dso = (medicare_pct * dso_medicare) + (commercial_pct * dso_commercial)
     
-    # A/R = 1.85 months of revenue (55.5 days / 30 days)
-    # But in RPM, collections are steady, so use more conservative multiplier
-    ar_months = min(blended_dso / 30, 1.5)  # Cap at 1.5 months max
+    # More conservative A/R calculation for established business
+    # RPM payments are more predictable than typical healthcare
+    ar_months = min(blended_dso / 45, 1.0)  # Cap at 1 month, use 45-day divisor
     accounts_receivable = monthly_revenue * ar_months
     
     # RPM businesses have minimal other working capital needs
     inventory = 0  # Devices shipped direct, no inventory holding
-    accounts_payable = monthly_costs * 0.5  # Pay staff bi-weekly, vendors monthly
+    # More realistic A/P - established business pays faster
+    accounts_payable = monthly_costs * 0.75  # 22.5 days average payment terms
     
     # Net Working Capital is just A/R minus A/P
     net_working_capital = accounts_receivable - accounts_payable
@@ -314,7 +338,6 @@ def run_projection(
       - Ora: flat PMPM + chosen kit per new + ONE-TIME dev CAPEX when Ora becomes active
     """
     months = settings["months"]
-    monthly_growth = settings["monthly_growth"]
     pph_growth = settings["patients_per_home_growth"]
     homes_per_year = settings["home_growth_per_year"]
     cash = settings["initial_cash"]
@@ -340,10 +363,13 @@ def run_projection(
     staff_minutes_available = settings["staff_minutes_available_per_month"]
     staffing_pmpm = settings.get("staffing_pmpm", 66.0)
     
-    # Track working capital properly (cumulative)
+    # Track working capital properly (cumulative, company-wide)
     prev_total_nwc = 0
 
     dev_capex_done = False
+    
+    # Company-wide cash tracking
+    month_cash_flows = {}  # Track cash flows by month to avoid double-counting
 
     for m in range(1, months+1):
         # staff ramp yearly
@@ -367,6 +393,9 @@ def run_projection(
 
         # software fee should be charged once per month (company-wide)
         software_fee_charged = False
+        
+        # Initialize monthly cash flow aggregation
+        month_cash_flows[m] = {"total_free_cash_flow": 0, "total_capex": 0, "total_nwc_change": 0}
 
         # Iterate states
         active_states = [s for s,conf in states.items() if m >= conf["start_month"]]
@@ -377,22 +406,129 @@ def run_projection(
             g = gpci[state]
             homes_now = homes[state] + homes_per_year * ((m-1)//12)
             pph = 20 * (1+pph_growth)**((m-1)//12)
-            max_patients = int(homes_now * pph)
+            # Set realistic max capacity - hard cap for Virginia
+            theoretical_capacity = int(homes_now * pph)
+            if state == "Virginia":
+                max_patients = min(25000, theoretical_capacity + 20000)  # Virginia capped at 25K patients
+            else:
+                max_patients = max(theoretical_capacity, 50000)  # Other states capped at 50K
 
             if m == conf["start_month"]:
                 new_pts = conf["initial_patients"]
                 attrition_pts = 0
             else:
-                # Calculate patient attrition (realistic churn)
-                monthly_attrition = settings.get("monthly_attrition", 0.03)  # 3% monthly attrition
+                # REFUA MODEL - Hill Valley Partnership Growth Logic
+                monthly_attrition = settings.get("monthly_attrition", 0.03)
                 attrition_pts = int(total_patients[state] * monthly_attrition)
                 
-                # Calculate net new patients after attrition
-                gross_new_pts = max(0, min(max_patients - total_patients[state], int(total_patients[state] * monthly_growth)))
-                new_pts = gross_new_pts
+                # Different growth phases
+                pilot_months = settings.get("pilot_months", 6)
+                post_pilot_intake = settings.get("post_pilot_monthly_intake", 400)
+                
+                if state == "Virginia":
+                    # HILL VALLEY PARTNERSHIP - CONTINUOUS FLOW MODEL
+                    hill_valley_discharges = settings.get("hill_valley_monthly_discharges", 1200)  # INCREASED for 100 homes
+                    initial_capture = settings.get("initial_capture_rate", 0.70)  # Higher initial capture
+                    target_capture = settings.get("target_capture_rate", 1.0)
+                    
+                    # Calculate intake rates based on capture percentages
+                    initial_intake = int(hill_valley_discharges * initial_capture)  # 840
+                    target_intake = int(hill_valley_discharges * target_capture)    # 1200
+                    
+                    if m <= pilot_months:
+                        # Pilot phase: stronger start to build momentum
+                        new_pts = max(0, 100 + (m * 50))  # Faster pilot growth
+                    elif m <= 12:
+                        # Ramp-up phase: aggressive capture to reach critical mass
+                        ramp_factor = (m - pilot_months) / (12 - pilot_months)
+                        new_pts = max(0, int(initial_intake * (0.5 + ramp_factor * 0.5)))
+                    elif m <= 24:
+                        # Scaling phase: full capture to reach 19,965 target
+                        # Month 13-24: Aggressive scaling
+                        scale_factor = (m - 12) / 12
+                        new_pts = int(initial_intake + (target_intake - initial_intake) * scale_factor * 1.5)
+                    elif m <= 36:
+                        # Growth phase: capturing full discharge volume plus expansion
+                        # Use configurable multiplier to reach target
+                        growth_mult = settings.get("growth_multiplier", 1.3)
+                        new_pts = int(target_intake * growth_mult)
+                    else:
+                        # STEADY STATE: Capturing target percentage of Hill Valley discharges
+                        base_intake = target_intake
+                        
+                        # Add some realistic variation (±10%)
+                        import random
+                        random.seed(m)  # Consistent randomness based on month
+                        monthly_variation = random.uniform(0.9, 1.1)
+                        
+                        # CONTINUOUS FLOW MODEL - Cap at market target
+                        # Virginia has 100 nursing homes continuously discharging patients
+                        market_target = settings.get("max_patients", 19965)  # Allow override
+                        
+                        if total_patients[state] >= market_target:
+                            # At target - just maintain patient base
+                            # Only replace attrition to stay at target
+                            new_pts = int(attrition_pts)  # Replace departing patients exactly
+                        elif total_patients[state] > market_target * 0.8:  # Above 80% of target
+                            # Approaching target, still strong intake from facilities
+                            new_pts = int(base_intake * 0.9 * monthly_variation)
+                        else:
+                            # Full intake until we reach market target
+                            new_pts = int(base_intake * monthly_variation)
+                        
+                        # Always at least replacing attrition to maintain patient base
+                        new_pts = max(new_pts, int(attrition_pts))
+                else:
+                    # OTHER STATES - Same nursing home partnership model!
+                    months_since_launch = m - conf["start_month"]
+                    
+                    if months_since_launch < 0:
+                        new_pts = 0  # Not launched yet
+                    elif months_since_launch == 0:
+                        # Launch month - initial partnerships
+                        new_pts = conf["initial_patients"]  # Start with 500 patients
+                    elif months_since_launch <= 6:
+                        # Ramp-up phase for new state
+                        ramp_factor = months_since_launch / 6
+                        state_intake = 300  # Each new state targets 300/month from partnerships
+                        new_pts = max(100, int(state_intake * ramp_factor))
+                    else:
+                        # STEADY STATE: Every state has continuous SNF/ALF discharge flow!
+                        state_intake = 300  # Base intake per state from partnerships
+                        
+                        # Add realistic variation
+                        import random
+                        random.seed(m + hash(state))  # Unique randomness per state
+                        monthly_variation = random.uniform(0.9, 1.1)
+                        
+                        # Scale based on state size
+                        if state == "Florida":
+                            state_intake = 400  # Larger retiree population
+                        elif state == "Texas":
+                            state_intake = 350  # Big state
+                        elif state == "California":
+                            state_intake = 400  # Huge market
+                        
+                        # As state matures, find equilibrium
+                        if total_patients[state] > 5000:
+                            new_pts = int(state_intake * 0.8 * monthly_variation)
+                        elif total_patients[state] > 3000:
+                            new_pts = int(state_intake * 0.9 * monthly_variation)
+                        else:
+                            new_pts = int(state_intake * monthly_variation)
+                        
+                        # Always replace attrition at minimum
+                        new_pts = max(new_pts, int(attrition_pts * 1.1))  # At least 10% growth over attrition
                 
                 # Apply attrition to existing patient base
-                total_patients[state] = max(0, total_patients[state] - attrition_pts + new_pts)
+                new_total = total_patients[state] - attrition_pts + new_pts
+                
+                # Cap at market target if specified
+                if state == "Virginia":
+                    market_cap = settings.get("max_patients", 19965)
+                    new_total = min(new_total, market_cap)
+                
+                total_patients[state] = max(0, new_total)
             
             if m == conf["start_month"]:
                 total_patients[state] = new_pts
@@ -402,39 +538,38 @@ def run_projection(
             # --- revenue calculation with multipliers ---
             include_theoretical = settings.get("include_theoretical", False)
             
-            # RPM Revenue (setup is one-time, others are monthly)
+            # CORE RPM REVENUE (Standard billing per CMS guidelines)
             rev_setup = rates["99453"]["rate"] * rates["99453"]["multiplier"] * util["rpm_setup"] * new_pts
             rev_99454 = g * rates["99454"]["rate"] * rates["99454"]["multiplier"] * util["rpm_16day"] * active_pts  
             rev_99457 = g * rates["99457"]["rate"] * rates["99457"]["multiplier"] * util["rpm_20min"] * active_pts
             rev_99458 = g * rates["99458"]["rate"] * rates["99458"]["multiplier"] * util["rpm_40min"] * active_pts  # Uses 1.35x multiplier
             rev_99091 = g * rates["99091"]["rate"] * rates["99091"]["multiplier"] * util["md_99091"] * active_pts
             
-            # CCM Revenue (Enhanced with complex care management for high-acuity patients)
+            # CORE CCM & PCM REVENUE (Standard billing per CMS guidelines)
             rev_99490 = g * rates["99490"]["rate"] * rates["99490"]["multiplier"] * util["ccm_99490"] * active_pts
             rev_99439 = g * rates["99439"]["rate"] * rates["99439"]["multiplier"] * util["ccm_99439"] * active_pts  # Uses 1.2x multiplier
-            # Complex CCM Revenue (Dynamic billing optimization for patients with worsening conditions)
-            rev_99487 = g * rates["99487"]["rate"] * rates["99487"]["multiplier"] * util.get("ccm_99487", 0.0) * active_pts
-            rev_99489 = g * rates["99489"]["rate"] * rates["99489"]["multiplier"] * util.get("ccm_99489", 0.0) * active_pts
-            # Enhanced data interpretation with AI-assisted analysis
-            rev_data_interp = g * rates["99091"]["rate"] * rates["99091"]["multiplier"] * util.get("data_99091", 0.0) * active_pts
             
-            # PCM Revenue (if enabled)
-            rev_99426 = g * rates["99426"]["rate"] * rates["99426"]["multiplier"] * util.get("pcm_99426",0.0) * active_pts if include_pcm else 0.0
-            rev_99427 = g * rates["99427"]["rate"] * rates["99427"]["multiplier"] * util.get("pcm_99427",0.0) * active_pts if include_pcm else 0.0  # Uses 1.15x multiplier
+            # PCM REVENUE (Principal Care Management - standard for single chronic conditions)
+            rev_99426 = g * rates["99426"]["rate"] * rates["99426"]["multiplier"] * util.get("pcm_99426", 0.15) * active_pts
+            rev_99427 = g * rates["99427"]["rate"] * rates["99427"]["multiplier"] * util.get("pcm_99427", 0.08) * active_pts
             
-            # TCM Revenue (per NEW patient transition - should cover hardware costs) 
+            # ENHANCED BILLING (Complex CCM for high-acuity patients - if enabled)
+            enhanced_billing = settings.get("enhanced_billing", False)
+            if enhanced_billing:
+                # Complex CCM for patients with multiple chronic conditions requiring intensive management
+                rev_99487 = g * rates["99487"]["rate"] * rates["99487"]["multiplier"] * util.get("ccm_99487", 0.25) * active_pts
+                rev_99489 = g * rates["99489"]["rate"] * rates["99489"]["multiplier"] * util.get("ccm_99489", 0.15) * active_pts
+            else:
+                rev_99487 = rev_99489 = 0
+            
+            # TCM REVENUE (One-time for new patient transitions) 
             rev_99495 = rates["99495"]["rate"] * rates["99495"]["multiplier"] * util["tcm_99495"] * new_pts
             rev_99496 = rates["99496"]["rate"] * rates["99496"]["multiplier"] * util["tcm_99496"] * new_pts
-            
-            # Theoretical Advanced Care Revenue (if enabled)
-            rev_alzheimers = g * rates["alzheimers_prevention"]["rate"] * rates["alzheimers_prevention"]["multiplier"] * util.get("alzheimers_prevention",0.0) * active_pts if include_theoretical else 0.0
-            rev_mental_health = g * rates["mental_health_support"]["rate"] * rates["mental_health_support"]["multiplier"] * util.get("mental_health_support",0.0) * active_pts if include_theoretical else 0.0  
-            rev_preventive = g * rates["preventive_care"]["rate"] * rates["preventive_care"]["multiplier"] * util.get("preventive_care",0.0) * active_pts if include_theoretical else 0.0
 
+            # REVENUE TOTAL (Core + Enhanced if enabled)
             gross = (rev_setup + rev_99454 + rev_99457 + rev_99458 + rev_99091 +
-                     rev_99490 + rev_99439 + rev_99487 + rev_99489 + rev_data_interp +
-                     rev_99426 + rev_99427 + rev_99495 + rev_99496 +
-                     rev_alzheimers + rev_mental_health + rev_preventive)
+                     rev_99490 + rev_99439 + rev_99487 + rev_99489 + 
+                     rev_99426 + rev_99427 + rev_99495 + rev_99496)
             net = gross * util["collection_rate"]
 
             # --- costs: Handle 60+ month infrastructure transition ---
@@ -459,7 +594,27 @@ def run_projection(
                 
                 chosen = settings["vendor_selected_kit"].get(vendor_name)
                 kit_cost = (vcfg.hardware_kits or {}).get(chosen, 0.0)
-                hardware = kit_cost * new_pts
+                
+                # Smart device management with recovery
+                recovery_rate = settings.get("device_recovery_rate", 0.85)
+                refurb_cost = settings.get("device_refurb_cost", 50)
+                logistics_cost = settings.get("device_logistics_cost", 25)
+                
+                # Calculate recovered devices from attrition
+                recovered_devices = int(attrition_pts * recovery_rate)
+                
+                # Net new devices needed (accounting for recovered/refurbished)
+                net_new_devices = max(0, new_pts - recovered_devices)
+                
+                # Hardware costs breakdown:
+                # 1. New devices for net new patients
+                # 2. Refurbishment for recovered devices
+                # 3. Logistics for all device movements
+                new_device_cost = kit_cost * net_new_devices
+                refurb_costs = refurb_cost * min(recovered_devices, new_pts)  # Only refurb what we'll reuse
+                logistics_costs = logistics_cost * (new_pts + attrition_pts)  # Ship to new patients + retrieve from leaving
+                
+                hardware = new_device_cost + refurb_costs + logistics_costs
                 
                 # Charge software fee once per month (company-wide)
                 software_fee = 0.0
@@ -467,14 +622,59 @@ def run_projection(
                     software_fee = vcfg.monthly_software_fee
                     software_fee_charged = True
 
-            overhead = min(overhead_base + 1000*len(active_states), overhead_cap)
+            # Realistic overhead scaling
+            base_overhead = settings.get("overhead_base", 25000)
+            per_patient_overhead = settings.get("overhead_per_patient", 2.0)
+            
+            # Add executive team costs at specific milestones
+            executive_costs = 0
+            if m >= 24 and active_pts > 3000:  # Month 24+ with significant scale
+                # CMO hired first for growth
+                executive_costs += 20000  # $240K annual
+            if m >= 30 and active_pts > 5000:  # Month 30+ 
+                # CTO for technology scaling
+                executive_costs += 22000  # $264K annual
+            if m >= 36 and active_pts > 8000:  # Month 36+
+                # CFO for financial management 
+                executive_costs += 18000  # $216K annual
+            
+            # Marketing budget as percentage of revenue
+            marketing_percent = settings.get("marketing_budget_percent", 0.08)
+            marketing_budget = net * marketing_percent
+            
+            # Apply overhead cap for economies of scale
+            overhead_cap = settings.get("overhead_cap", 150000)
+            overhead_before_cap = base_overhead + (per_patient_overhead * active_pts) + executive_costs + marketing_budget
+            overhead = min(overhead_before_cap, overhead_cap)
             # Enhanced staffing model with specialized roles and AI efficiency
             staffing = _calculate_enhanced_staffing_costs(active_pts, active_states, settings)
 
+            # State expansion costs with management hierarchy
+            regional_costs = 0
+            state_setup_costs = 0
+            
+            # Head of State for each active state
+            head_of_state_monthly = settings.get("head_of_state_salary", 12000) * len(active_states)
+            
+            # Managers based on patient count (1 per 2,500 patients)
+            patients_per_manager = settings.get("patients_per_manager", 2500)
+            manager_salary = settings.get("manager_salary", 7500)
+            managers_needed = max(1, (active_pts + patients_per_manager - 1) // patients_per_manager)  # Round up
+            manager_monthly = manager_salary * managers_needed
+            
+            # Annual licensing/compliance costs per state
+            licensing_monthly = (settings.get("state_licensing_annual", 25000) / 12) * len(active_states)
+            
+            # One-time state setup costs (charged in the launch month)
+            if m == conf["start_month"] and state != "Virginia":  # No setup cost for first state
+                state_setup_costs = settings.get("state_setup_cost", 50000)
+            
+            regional_costs = head_of_state_monthly + manager_monthly + licensing_monthly
+            
             rpm_minutes_demand = active_pts * (20*util["rpm_20min"] + 20*util["rpm_40min"])
             staff_minutes_capacity = staff_fte * staff_minutes_available
 
-            total_costs = platform + hardware + software_fee + overhead + staffing + dev_capex + infrastructure_capex
+            total_costs = platform + hardware + software_fee + overhead + staffing + regional_costs + state_setup_costs + dev_capex + infrastructure_capex
             ebitda = net - total_costs
             
             # Working Capital calculation with proper tracking
@@ -489,18 +689,32 @@ def run_projection(
             capex_total = dev_capex + infrastructure_capex
             free_cash_flow = ebitda - capex_total - change_in_nwc
             
-            cash += free_cash_flow
+            # Accumulate monthly cash flows (company-wide)
+            month_cash_flows[m]["total_free_cash_flow"] += free_cash_flow
 
             per_rev = net/active_pts if active_pts else 0.0
             # exclude one-time dev capex from per-patient cost
             per_cost = (total_costs - dev_capex)/active_pts if active_pts else 0.0
             per_margin = per_rev - per_cost
 
+            # Determine growth phase for tracking
+            if state == "Virginia":
+                if m <= 6:
+                    phase = "Pilot"
+                elif m <= 12:
+                    phase = "Ramp-up"
+                elif m <= 24:
+                    phase = "Hill Valley Scale"
+                else:
+                    phase = "National Expansion"
+            else:
+                phase = "Multi-State"
+            
             rows.append({
-                "Month": m, "State": state, "VendorActive": vendor_name,
+                "Month": m, "State": state, "VendorActive": vendor_name, "Phase": phase,
                 "New Patients": new_pts, "Total Patients": active_pts,
                 "Total Revenue": net, "Total Costs": total_costs, "EBITDA": ebitda, 
-                "Free Cash Flow": free_cash_flow, "Cash Balance": cash,
+                "Free Cash Flow": free_cash_flow, "Cash Balance": 0,  # Updated later at company level
                 "Platform Cost": platform, "Hardware Cost": hardware, "Software Fee": software_fee,
                 "Overhead": overhead, "Staffing Cost": staffing, 
                 "Dev Capex": dev_capex, "Infrastructure Capex": infrastructure_capex,
@@ -509,14 +723,21 @@ def run_projection(
                 "Change in NWC": change_in_nwc,
                 "Per-Patient Revenue": per_rev, "Per-Patient Cost": per_cost, "Per-Patient Margin": per_margin,
                 "RPM_Minutes_Demand": rpm_minutes_demand, "Staff_Minutes_Capacity": staff_minutes_capacity,
-                # Individual billing code revenues for analysis
+                # Individual billing code revenues for analysis (Core services only)
                 "Rev_99453": rev_setup * util["collection_rate"], "Rev_99454": rev_99454 * util["collection_rate"],
                 "Rev_99457": rev_99457 * util["collection_rate"], "Rev_99458": rev_99458 * util["collection_rate"],
                 "Rev_99091": rev_99091 * util["collection_rate"], "Rev_99490": rev_99490 * util["collection_rate"],
-                "Rev_99439": rev_99439 * util["collection_rate"], "Rev_99426": rev_99426 * util["collection_rate"],
-                "Rev_99427": rev_99427 * util["collection_rate"], "Rev_99495": rev_99495 * util["collection_rate"],
-                "Rev_99496": rev_99496 * util["collection_rate"], "Rev_Theoretical": (rev_alzheimers + rev_mental_health + rev_preventive) * util["collection_rate"],
+                "Rev_99439": rev_99439 * util["collection_rate"], "Rev_99495": rev_99495 * util["collection_rate"],
+                "Rev_99496": rev_99496 * util["collection_rate"],
             })
+        
+        # Update company-wide cash balance once per month
+        cash += month_cash_flows[m]["total_free_cash_flow"]
+        
+        # Update all rows for this month with the same cash balance
+        for i, row in enumerate(rows):
+            if row["Month"] == m:
+                rows[i]["Cash Balance"] = cash
 
     df = pd.DataFrame(rows)
     df["Year"] = (df["Month"] - 1)//12 + 1

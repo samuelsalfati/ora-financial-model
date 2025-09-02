@@ -401,20 +401,23 @@ with st.sidebar:
     
     st.subheader("🗺️ State Expansion (Show Massive Upside!)")
     
-    # Show states but only Virginia is active for now
+    # Only Virginia checkbox, others shown as text
     virginia_active = st.checkbox(f"✅ Virginia ({market_data['Virginia']['target_patients']:,} patients)", value=True, disabled=True)
-    florida_active = st.checkbox(f"🔒 Florida ({market_data['Florida']['target_patients']:,} patients) - Phase 2", value=False, disabled=True)
-    texas_active = st.checkbox(f"🔒 Texas ({market_data['Texas']['target_patients']:,} patients) - Phase 2", value=False, disabled=True) 
-    newyork_active = st.checkbox(f"🔒 New York ({market_data['New York']['target_patients']:,} patients) - Phase 3", value=False, disabled=True)
-    california_active = st.checkbox(f"🔒 California ({market_data['California']['target_patients']:,} patients) - Phase 3", value=False, disabled=True)
     
-    # Force them to False since they're disabled
+    # Show other states as future expansion (not clickable)
+    st.markdown("**🚀 Future Expansion Markets:**")
+    st.markdown(f"• Florida: {market_data['Florida']['target_patients']:,} patients - Phase 2")
+    st.markdown(f"• Texas: {market_data['Texas']['target_patients']:,} patients - Phase 2")
+    st.markdown(f"• New York: {market_data['New York']['target_patients']:,} patients - Phase 3")
+    st.markdown(f"• California: {market_data['California']['target_patients']:,} patients - Phase 3")
+    
+    # Set all others to False
     florida_active = False
     texas_active = False
     newyork_active = False
     california_active = False
     
-    st.info("🚀 **Expansion Strategy**: Virginia proof of concept → Multi-state rollout in Year 2+")
+    st.success("**Total Addressable Market: 85,000+ patients across 5 states!**")
     
     st.subheader("🏥 Hill Valley Partnership Parameters")
     st.info("💡 **Adjust these to reach your target patient count**")

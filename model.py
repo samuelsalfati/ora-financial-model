@@ -427,9 +427,10 @@ def run_projection(
                 pilot_months = settings.get("pilot_months", 6)
                 post_pilot_intake = settings.get("post_pilot_monthly_intake", 400)
                 
-                if state == "Virginia":
-                    # HILL VALLEY PARTNERSHIP - CONTINUOUS FLOW MODEL
-                    hill_valley_discharges = settings.get("hill_valley_monthly_discharges", 1200)  # INCREASED for 100 homes
+                # Growth logic applies to all states now (not just Virginia)
+                if True:  # All states use discharge-based growth model
+                    # PARTNERSHIP CONTINUOUS FLOW MODEL (each state has nursing home partnerships)
+                    hill_valley_discharges = settings.get("hill_valley_monthly_discharges", 1200)  # Base discharge rate
                     initial_capture = settings.get("initial_capture_rate", 0.70)  # Higher initial capture
                     target_capture = settings.get("target_capture_rate", 1.0)
                     
@@ -525,10 +526,17 @@ def run_projection(
                 # Apply attrition to existing patient base
                 new_total = total_patients[state] - attrition_pts + new_pts
                 
-                # Cap at market target if specified
+                # Cap at market target if specified 
+                # Virginia has specific cap, other states grow based on their market
                 if state == "Virginia":
                     market_cap = settings.get("max_patients", 19965)
                     new_total = min(new_total, market_cap)
+                # Other states can grow based on their discharge capacity
+                else:
+                    # Each state has its own growth potential
+                    state_discharges = settings.get("hill_valley_monthly_discharges", 1200)
+                    state_cap = int(state_discharges * 20)  # Rough cap based on discharge capacity
+                    new_total = min(new_total, state_cap)
                 
                 total_patients[state] = max(0, new_total)
             

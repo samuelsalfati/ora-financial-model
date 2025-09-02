@@ -51,62 +51,12 @@ def get_image_base64(image_path):
 
 logo_base64 = get_image_base64("Assets/ChatGPT Image Jul 15, 2025, 09_34_29 PM_1752640549696.png")
 
-# Professional CSS with white background and readable fonts
+# MINIMAL CSS - just hide ugly buttons
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-    
-    /* CSS Variables - Matching your app's design system */
-    :root {
-        --background: hsl(210, 20%, 98%);
-        --foreground: #1a1a1a;
-        --card: hsl(0, 0%, 100%);
-        --card-foreground: #200E1B;
-        --border: hsl(214, 32%, 91%);
-        --primary: #00B7D8;
-        --radius: 0.5rem;
-        
-        /* Ora Living Brand Colors */
-        --ora-primary: #200E1B;
-        --ora-highlight: #00B7D8;
-        --ora-support-1: #5F8996;
-        --ora-support-2: #DD3F8E;
-        --ora-support-3: #DF9039;
-        --ora-gray-50: hsl(210, 20%, 98%);
-        --ora-gray-100: hsl(220, 14%, 93%);
-    }
-    
-    /* Modern glass-morphism app background */
-    .stApp {
-        background: linear-gradient(135deg, 
-            var(--ora-gray-50) 0%, 
-            hsl(210, 30%, 96%) 25%,
-            hsl(190, 20%, 97%) 50%,
-            hsl(210, 25%, 97%) 75%,
-            var(--ora-gray-50) 100%
-        ) !important;
-        color: var(--ora-primary) !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    }
-    
-    .main, .block-container, .element-container {
-        background: transparent !important;
-        color: var(--ora-primary) !important;
-    }
-    
-    /* Glass-morphism sidebar */
-    .css-1d391kg {
-        background: rgba(255, 255, 255, 0.4) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 0 24px 24px 0 !important;
-    }
-    
-    /* Header with logo positioned top-right */
-    .main-header {
-        background: #FFFFFF;
+    .stDeployButton {display:none;}
+    header[data-testid="stHeader"] {display:none;}
+</style>
         padding: 1rem;
         border-radius: 10px;
         margin-bottom: 1.5rem;
@@ -543,22 +493,22 @@ if "selected_scenario" not in st.session_state:
 states_config = st.session_state.states_config
 sc = st.session_state.scenario
 
-# Logo section at top-left
+# Header with logo in main area
 if logo_base64:
     st.markdown(f"""
-    <div style="display: flex; align-items: center; margin-bottom: 1rem; padding: 1rem 0; border-bottom: 2px solid #00B7D8;">
+    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; padding: 1rem 0; border-bottom: 1px solid #DDD;">
         <img src="data:image/png;base64,{logo_base64}" width="80" style="margin-right: 1.5rem;">
         <div>
-            <div style="font-size: 2.5rem; color: #200E1B; font-family: 'Inter', sans-serif; font-weight: 700; margin: 0;">ORA LIVING</div>
-            <div style="color: #5F8996; font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-top: 0.2rem;">Professional Multi-State Financial Model</div>
+            <div style="font-size: 2.5rem; color: #00B7D8; font-family: 'Inter', sans-serif; font-weight: 700; margin: 0;">ORA LIVING</div>
+            <div style="color: #666; font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-top: 0.2rem;">Professional Financial Model</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
-    <div style="margin-bottom: 1rem; padding: 1rem 0; border-bottom: 2px solid #00B7D8;">
-        <div style="font-size: 2.5rem; color: #200E1B; font-family: 'Inter', sans-serif; font-weight: 700; margin: 0;">🏥 ORA LIVING</div>
-        <div style="color: #5F8996; font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-top: 0.5rem;">Professional Multi-State Financial Model</div>
+    <div style="text-align: center; margin-bottom: 2rem; padding: 1rem 0; border-bottom: 1px solid #DDD;">
+        <div style="font-size: 2.5rem; color: #00B7D8; font-family: 'Inter', sans-serif; font-weight: 700; margin: 0;">🏥 ORA LIVING</div>
+        <div style="color: #666; font-family: 'Inter', sans-serif; font-size: 1.1rem; margin-top: 0.5rem;">Professional Financial Model</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -609,16 +559,32 @@ function showHelp(topic) {
 
 # Sidebar - Professional parameter controls
 with st.sidebar:
-    st.markdown(f'''
-    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #00B7D8, #DD3F8E); border-radius: 8px; margin-bottom: 1rem; color: white;">
-        <h2 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: white;">🎛️ Model Controls</h2>
-        <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; opacity: 0.9; color: white;">Professional Financial Modeling</p>
+    # Logo in sidebar
+    if logo_base64:
+        st.markdown(f'''
+        <div style="text-align: center; margin-bottom: 1.5rem; padding: 1rem 0; border-bottom: 1px solid #333;">
+            <img src="data:image/png;base64,{logo_base64}" width="60" style="margin-bottom: 0.5rem;">
+            <div style="font-size: 1.1rem; color: #00B7D8; font-weight: 600;">ORA LIVING</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    else:
+        st.markdown('''
+        <div style="text-align: center; margin-bottom: 1.5rem; padding: 1rem 0; border-bottom: 1px solid #E0E0E0;">
+            <div style="font-size: 1.5rem; color: #00B7D8; font-weight: 700;">🏥</div>
+            <div style="font-size: 1.1rem; color: #00B7D8; font-weight: 600;">ORA LIVING</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    st.markdown('''
+    <div style="text-align: center; padding: 1rem; background: #F5F5F5; border: 1px solid #E0E0E0; border-radius: 8px; margin-bottom: 1rem;">
+        <h2 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #00B7D8;">🎛️ Model Controls</h2>
+        <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #666;">Professional Financial Modeling</p>
     </div>
     ''', unsafe_allow_html=True)
     
     # Initial Timeline - now editable
     st.markdown("")
-    st.markdown(f'<div style="background: {ORA_COLORS["very_light_gray"]}; padding: 0.8rem; border-radius: 6px; border-left: 4px solid {ORA_COLORS["primary_cyan"]}; margin-bottom: 1rem;"><strong>📅 Project Timeline</strong></div>', unsafe_allow_html=True)
+    st.markdown('<div style="background: #F5F5F5; padding: 0.8rem; border-radius: 6px; border-left: 4px solid #00B7D8; margin-bottom: 1rem; border: 1px solid #E0E0E0;"><strong style="color: #000;">📅 Project Timeline</strong></div>', unsafe_allow_html=True)
     sc["settings"]["months"] = st.number_input(
         "Project Timeline (Months)", 
         min_value=12, 
@@ -629,7 +595,7 @@ with st.sidebar:
     )
     
     # Scenario templates  
-    st.markdown(f'<div style="background: {ORA_COLORS["very_light_gray"]}; padding: 0.8rem; border-radius: 6px; border-left: 4px solid {ORA_COLORS["magenta"]}; margin: 1.5rem 0 1rem 0;"><strong>📋 Choose Scenario</strong></div>', unsafe_allow_html=True)
+    st.markdown('<div style="background: #F5F5F5; padding: 0.8rem; border-radius: 6px; border-left: 4px solid #DD3F8E; margin: 1.5rem 0 1rem 0; border: 1px solid #E0E0E0;"><strong style="color: #000;">📋 Choose Scenario</strong></div>', unsafe_allow_html=True)
     
     scenario_options = {
         "Conservative": {"growth": 0.05, "states": ["Virginia"], "multiplier": 1.0},
@@ -676,7 +642,7 @@ with st.sidebar:
     st.dataframe(param_df, use_container_width=True, hide_index=True)
     
     # Quick parameter edits
-    st.markdown(f'<div style="background: {ORA_COLORS["very_light_gray"]}; padding: 0.8rem; border-radius: 6px; border-left: 4px solid {ORA_COLORS["primary_cyan"]}; margin: 1.5rem 0 1rem 0;"><strong>📝 Quick Adjustments</strong></div>', unsafe_allow_html=True)
+    st.markdown('<div style="background: #F5F5F5; padding: 0.8rem; border-radius: 6px; border-left: 4px solid #00B7D8; margin: 1.5rem 0 1rem 0; border: 1px solid #E0E0E0;"><strong style="color: #000;">📝 Quick Adjustments</strong></div>', unsafe_allow_html=True)
     
     sc["settings"]["monthly_growth"] = st.select_slider(
         "Growth Rate", 

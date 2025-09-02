@@ -399,14 +399,14 @@ with st.sidebar:
         - **Expansion Opportunity**: 200K+ eligible patients in Florida alone
         """)
     
-    st.subheader("🗺️ State Expansion")
+    st.subheader("🗺️ State Expansion (Show Massive Upside!)")
     
-    # Enable/disable states with partnership context
-    virginia_active = st.checkbox(f"Virginia ({market_data['Virginia']['target_patients']:,} patients via partnerships)", value=True, disabled=True)
-    florida_active = st.checkbox(f"Florida ({market_data['Florida']['target_patients']:,} patients via partnerships)", value=False)
-    texas_active = st.checkbox(f"Texas ({market_data['Texas']['target_patients']:,} patients via partnerships)", value=False) 
-    newyork_active = st.checkbox(f"New York ({market_data['New York']['target_patients']:,} patients via partnerships)", value=False)
-    california_active = st.checkbox(f"California ({market_data['California']['target_patients']:,} patients via partnerships)", value=False)
+    # Enable/disable states to show HUGE growth potential
+    virginia_active = st.checkbox(f"Virginia ({market_data['Virginia']['target_patients']:,} patients)", value=True, disabled=True)
+    florida_active = st.checkbox(f"Florida ({market_data['Florida']['target_patients']:,} patients) - HUGE market!", value=False)
+    texas_active = st.checkbox(f"Texas ({market_data['Texas']['target_patients']:,} patients) - Massive opportunity!", value=False) 
+    newyork_active = st.checkbox(f"New York ({market_data['New York']['target_patients']:,} patients) - Premium market!", value=False)
+    california_active = st.checkbox(f"California ({market_data['California']['target_patients']:,} patients) - Tech hub!", value=False)
     
     st.subheader("🏥 Hill Valley Partnership Parameters")
     st.info("💡 **Adjust these to reach your target patient count**")
@@ -661,10 +661,19 @@ else:
 # Update state config with new initial patients and active states
 st.session_state.states_config["Virginia"]["initial_patients"] = initial_patients
 st.session_state.states_config["Virginia"]["active"] = virginia_active
-st.session_state.states_config["Florida"]["active"] = florida_active  
+st.session_state.states_config["Florida"]["active"] = florida_active
+# If Florida is selected, start it at month 1 instead of month 25
+if florida_active:
+    st.session_state.states_config["Florida"]["start_month"] = 1
 st.session_state.states_config["Texas"]["active"] = texas_active
+if texas_active:
+    st.session_state.states_config["Texas"]["start_month"] = 1
 st.session_state.states_config["New York"]["active"] = newyork_active
+if newyork_active:
+    st.session_state.states_config["New York"]["start_month"] = 1
 st.session_state.states_config["California"]["active"] = california_active
+if california_active:
+    st.session_state.states_config["California"]["start_month"] = 1
 
 # Filter for only active states before running model
 active_states_config = {k: v for k, v in st.session_state.states_config.items() if v["active"]}

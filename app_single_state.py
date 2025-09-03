@@ -208,9 +208,15 @@ with st.sidebar:
         }
     }
     
-    # Fixed to moderate strategy for simplicity
-    partnership_strategy = "Moderate"
-    multiplier = 1.0  # Moderate multiplier
+    partnership_strategy = st.selectbox(
+        "Partnership Strategy", 
+        ["Conservative", "Moderate", "Aggressive"],
+        index=1
+    )
+    
+    # Adjust target partnerships based on strategy
+    multipliers = {"Conservative": 0.6, "Moderate": 1.0, "Aggressive": 1.8}
+    multiplier = multipliers[partnership_strategy]
     
     # Calculate partnership-based patient targets
     total_target_patients = 0
@@ -393,32 +399,28 @@ with st.sidebar:
         - **Expansion Opportunity**: 200K+ eligible patients in Florida alone
         """)
     
-    st.subheader("🏥 Market Focus: Virginia")
+    st.subheader("🗺️ State Expansion (Show Massive Upside!)")
     
-    # Single state focus - Virginia with Hill Valley Partnership
-    st.info(f"**Hill Valley Partnership**: 100 nursing homes → {market_data['Virginia']['target_patients']:,} patient opportunity")
+    # Only Virginia checkbox, others shown as text
+    virginia_active = st.checkbox(f"✅ Virginia ({market_data['Virginia']['target_patients']:,} patients)", value=True, disabled=True)
     
-    # Fixed to Virginia only for clean single-state model
-    virginia_active = True
+    # Show other states as future expansion (not clickable)
+    st.markdown("**🚀 Future Expansion Markets:**")
+    st.markdown(f"• Florida: {market_data['Florida']['target_patients']:,} patients - Phase 2")
+    st.markdown(f"• Texas: {market_data['Texas']['target_patients']:,} patients - Phase 2")
+    st.markdown(f"• New York: {market_data['New York']['target_patients']:,} patients - Phase 3")
+    st.markdown(f"• California: {market_data['California']['target_patients']:,} patients - Phase 3")
+    
+    # Set all others to False
     florida_active = False
     texas_active = False
     newyork_active = False
     california_active = False
     
-    # Show expansion potential without complexity
-    with st.expander("📈 Future Expansion Potential"):
-        st.markdown("""
-        **Phase 2+ Markets (Years 3-5):**
-        - Florida: 12,000+ patients
-        - Texas: 21,000+ patients  
-        - New York: 13,000+ patients
-        - California: 18,000+ patients
-        
-        **Total Addressable Market: 85,000+ patients**
-        """)
+    st.success("**Total Addressable Market: 85,000+ patients across 5 states!**")
     
-    st.subheader("🎯 Growth Parameters")
-    st.caption("Fine-tune growth to reach 19,965 patient target")
+    st.subheader("🏥 Hill Valley Partnership Parameters")
+    st.info("💡 **Adjust these to reach your target patient count**")
     
     # Use session state values if they exist, otherwise use defaults
     default_hv = int(st.session_state.scenario["settings"].get("hill_valley_monthly_discharges", 600))
@@ -438,24 +440,19 @@ with st.sidebar:
     growth_multiplier = st.slider("Growth Phase Multiplier", 1.0, 3.0, default_growth, 0.1,
                                  help="Multiplier during months 25-36 to accelerate to target")
     
-    with st.expander("🏥 Operational Parameters (Advanced)", expanded=False):
-        clinical_staff_pmpm = st.slider("Clinical Staff ($ per patient per month)", 20, 60, 35, 5)
-        family_care_pmpm = st.slider("Family Care Liaisons ($ per patient per month)", 5, 20, 10, 1)
-        admin_staff_pmpm = st.slider("Admin Staff ($ per patient per month)", 5, 25, 15, 1)
-        ai_efficiency = st.slider("AI Efficiency Factor (%)", 70, 100, 90, 5, 
-                                 help="AI reduces staffing costs by automating tasks")
-        overhead_per_patient = st.slider("Overhead ($ per patient per month)", 5, 20, 8, 1,
-                                        help="Fixed costs allocated per patient")
+    st.subheader("🏥 Operational Parameters") 
+    clinical_staff_pmpm = st.slider("Clinical Staff ($ per patient per month)", 20, 60, 35, 5)
     
-    # Set defaults if not in expander
-    if 'clinical_staff_pmpm' not in locals():
-        clinical_staff_pmpm = 35
-        family_care_pmpm = 10
-        admin_staff_pmpm = 15
-        ai_efficiency = 90
-        overhead_per_patient = 8
+    family_care_pmpm = st.slider("Family Care Liaisons ($ per patient per month)", 5, 20, 10, 1)
     
+    admin_staff_pmpm = st.slider("Admin Staff ($ per patient per month)", 5, 25, 15, 1)
+    
+    ai_efficiency = st.slider("AI Efficiency Factor (%)", 70, 100, 90, 5, 
+                             help="AI reduces staffing costs by automating tasks")
     ai_efficiency_factor = ai_efficiency / 100
+    
+    overhead_per_patient = st.slider("Overhead ($ per patient per month)", 5, 20, 8, 1,
+                                    help="Fixed costs allocated per patient")
     
     st.subheader("💰 Revenue Enhancement")
     
@@ -465,13 +462,13 @@ with st.sidebar:
     if enhanced_billing:
         st.info("📈 Complex CCM adds ~$40/patient for patients requiring intensive chronic care management")
     
-    with st.expander("📊 Billing & Eligibility Parameters (Advanced)", expanded=False):
-        st.write("**Adjust eligibility rates and service intensity factors:**")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.write("**RPM Services:**")
+    st.subheader("📊 Patient Eligibility & Service Factors")
+    st.write("**Adjust eligibility rates and service intensity factors:**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("**RPM Services:**")
         default_rpm_device = int(st.session_state.scenario["util"].get("rpm_16day", 0.95) * 100)
         rpm_device_rate = st.slider("Device Eligibility (99454) %", 70, 100, default_rpm_device, 5,
                                    help="% of patients eligible for RPM device monitoring")

@@ -418,6 +418,8 @@ def run_projection(
             if m == conf["start_month"]:
                 new_pts = conf["initial_patients"]
                 attrition_pts = 0
+                # Initialize the state's patient count on first month
+                total_patients[state] = new_pts
             else:
                 # REFUA MODEL - Hill Valley Partnership Growth Logic
                 monthly_attrition = settings.get("monthly_attrition", 0.03)
@@ -527,21 +529,33 @@ def run_projection(
                 new_total = total_patients[state] - attrition_pts + new_pts
                 
                 # Cap at market target if specified 
-                # Virginia has specific cap, other states grow based on their market
+                # Each state has its own market cap
                 if state == "Virginia":
                     market_cap = settings.get("max_patients", 19965)
                     new_total = min(new_total, market_cap)
-                # Other states can grow based on their discharge capacity
+                elif state == "Florida":
+                    # Florida can grow to its market potential
+                    florida_cap = 25000  # Florida market cap
+                    new_total = min(new_total, florida_cap)
+                elif state == "Texas":
+                    texas_cap = 30000  # Texas is huge
+                    new_total = min(new_total, texas_cap)
+                elif state == "New York":
+                    ny_cap = 20000  # NY market cap
+                    new_total = min(new_total, ny_cap)
+                elif state == "California":
+                    ca_cap = 25000  # CA market cap
+                    new_total = min(new_total, ca_cap)
                 else:
-                    # Each state has its own growth potential
-                    state_discharges = settings.get("hill_valley_monthly_discharges", 1200)
-                    state_cap = int(state_discharges * 20)  # Rough cap based on discharge capacity
-                    new_total = min(new_total, state_cap)
+                    # Default cap for other states
+                    new_total = min(new_total, 20000)
                 
                 total_patients[state] = max(0, new_total)
             
-            if m == conf["start_month"]:
-                total_patients[state] = new_pts
+            # Don't reset if we already calculated the total above
+            # This was a bug - it was overwriting the calculated growth!
+            # if m == conf["start_month"]:
+            #     total_patients[state] = new_pts
             
             active_pts = total_patients[state]
 

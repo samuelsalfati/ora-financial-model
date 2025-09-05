@@ -591,115 +591,114 @@ try:
     )
     
     # Tabs for different views
-    # Create tabs first for better navigation
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "📈 Analytics", "💰 Valuation", "📋 Data Tables", "📖 Model Overview"])
     
-    # Growth Scenario Buttons - below tabs but above content
-    st.subheader("🎯 Growth Scenarios")
-    st.caption("Select a scenario to override all parameters and reach 19,965 patients at different timelines")
-    
-    # Calculate target
-    selected_states_target = 19965  # Virginia target
-    
-    col_cons, col_timeline, col_aggr, col_reset = st.columns(4)
-    
-    with col_cons:
-        if st.button("📉 Conservative\n(5 Years)", use_container_width=True, type="secondary"):
-            # Conservative: Reach 19,965 patients around month 48-60
-            st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 700
-            st.session_state.scenario["settings"]["initial_capture_rate"] = 0.50
-            st.session_state.scenario["settings"]["target_capture_rate"] = 0.80
-            st.session_state.scenario["settings"]["growth_multiplier"] = 1.2
-            st.session_state.scenario["settings"]["monthly_attrition"] = 0.03
-            st.session_state.scenario["settings"]["months"] = 60
-            st.session_state.scenario["settings"]["max_patients"] = 19965
-            # Conservative billing utilization
-            st.session_state.scenario["util"]["collection_rate"] = 0.92
-            st.session_state.scenario["util"]["rpm_16day"] = 0.90  # Lower device eligibility
-            st.session_state.scenario["util"]["rpm_20min"] = 0.88  # Lower management
-            st.session_state.scenario["util"]["rpm_40min"] = 0.45  # Lower additional sessions
-            st.session_state.scenario["util"]["ccm_99490"] = 0.70  # Lower CCM
-            st.session_state.scenario["util"]["md_99091"] = 0.65  # Standard MD review
-            # Set override flags and force refresh
-            st.session_state.months_override = True
-            st.session_state.growth_override = True
-            st.session_state.attrition_override = True
-            st.session_state.patients_override = True
-            st.session_state.scenario_changed = True
-            st.rerun()
-    
-    with col_timeline:
-        if st.button("📈 On Timeline\n(4 Years)", use_container_width=True, type="primary"):
-            # Standard: Reach 19,965 patients around month 40-48
-            st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 900
-            st.session_state.scenario["settings"]["initial_capture_rate"] = 0.60
-            st.session_state.scenario["settings"]["target_capture_rate"] = 0.95
-            st.session_state.scenario["settings"]["growth_multiplier"] = 1.4
-            st.session_state.scenario["settings"]["monthly_attrition"] = 0.03
-            st.session_state.scenario["settings"]["months"] = 60
-            st.session_state.scenario["settings"]["max_patients"] = 19965
-            # Standard billing utilization
-            st.session_state.scenario["util"]["collection_rate"] = 0.95
-            st.session_state.scenario["util"]["rpm_16day"] = 0.95  # Standard device eligibility
-            st.session_state.scenario["util"]["rpm_20min"] = 0.92  # Standard management
-            st.session_state.scenario["util"]["rpm_40min"] = 0.55  # Standard additional sessions
-            st.session_state.scenario["util"]["ccm_99490"] = 0.75  # Standard CCM
-            st.session_state.scenario["util"]["md_99091"] = 0.65  # Standard MD review
-            # Set override flags and force refresh
-            st.session_state.months_override = True
-            st.session_state.growth_override = True
-            st.session_state.attrition_override = True
-            st.session_state.patients_override = True
-            st.session_state.scenario_changed = True
-            st.rerun()
-            
-    with col_aggr:
-        if st.button("🚀 Aggressive\n(3 Years)", use_container_width=True, type="secondary"):
-            # Aggressive: Reach 19,965 patients around month 28-36
-            st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 1100
-            st.session_state.scenario["settings"]["initial_capture_rate"] = 0.70
-            st.session_state.scenario["settings"]["target_capture_rate"] = 0.95
-            st.session_state.scenario["settings"]["growth_multiplier"] = 1.6
-            st.session_state.scenario["settings"]["monthly_attrition"] = 0.025
-            st.session_state.scenario["settings"]["months"] = 60
-            st.session_state.scenario["settings"]["max_patients"] = 19965
-            # Aggressive billing utilization - maximize everything
-            st.session_state.scenario["util"]["collection_rate"] = 0.95
-            st.session_state.scenario["util"]["rpm_16day"] = 0.98  # Max device eligibility
-            st.session_state.scenario["util"]["rpm_20min"] = 0.95  # Max management
-            st.session_state.scenario["util"]["rpm_40min"] = 0.65  # Higher additional sessions
-            st.session_state.scenario["util"]["ccm_99490"] = 0.80  # Higher CCM
-            st.session_state.scenario["util"]["md_99091"] = 0.70  # Higher MD review
-            st.session_state.scenario["settings"]["ai_efficiency_factor"] = 0.85  # Better AI efficiency
-            # Set override flags and force refresh
-            st.session_state.months_override = True
-            st.session_state.growth_override = True
-            st.session_state.attrition_override = True
-            st.session_state.patients_override = True
-            st.session_state.scenario_changed = True
-            st.rerun()
-            
-    with col_reset:
-        if st.button("🔄 Reset to\nManual", use_container_width=True):
-            # Clear override flags
-            for key in ["months_override", "growth_override", "attrition_override", "patients_override"]:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
-    
-    # Show which scenario is active
-    if st.session_state.get("scenario_changed"):
-        hv_discharges = st.session_state.scenario["settings"].get("hill_valley_monthly_discharges", 900)
-        if hv_discharges == 700:
-            st.success("✅ Conservative scenario active (5 years to 19,965 patients)")
-        elif hv_discharges == 900:
-            st.success("✅ On Timeline scenario active (4 years to 19,965 patients)")
-        elif hv_discharges == 1100:
-            st.success("✅ Aggressive scenario active (3 years to 19,965 patients)")
-    
-    st.divider()
-    
     with tab1:
+        # Growth Scenario Buttons - at top of Dashboard tab
+        st.subheader("🎯 Growth Scenarios")
+        st.caption("Select a scenario to override all parameters and reach 19,965 patients at different timelines")
+        
+        # Calculate target
+        selected_states_target = 19965  # Virginia target
+        
+        col_cons, col_timeline, col_aggr, col_reset = st.columns(4)
+        
+        with col_cons:
+            if st.button("📉 Conservative\n(5 Years)", use_container_width=True, type="secondary", key="dash_cons"):
+                # Conservative: Reach 19,965 patients around month 48-60
+                st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 700
+                st.session_state.scenario["settings"]["initial_capture_rate"] = 0.50
+                st.session_state.scenario["settings"]["target_capture_rate"] = 0.80
+                st.session_state.scenario["settings"]["growth_multiplier"] = 1.2
+                st.session_state.scenario["settings"]["monthly_attrition"] = 0.03
+                st.session_state.scenario["settings"]["months"] = 60
+                st.session_state.scenario["settings"]["max_patients"] = 19965
+                # Conservative billing utilization
+                st.session_state.scenario["util"]["collection_rate"] = 0.92
+                st.session_state.scenario["util"]["rpm_16day"] = 0.90  # Lower device eligibility
+                st.session_state.scenario["util"]["rpm_20min"] = 0.88  # Lower management
+                st.session_state.scenario["util"]["rpm_40min"] = 0.45  # Lower additional sessions
+                st.session_state.scenario["util"]["ccm_99490"] = 0.70  # Lower CCM
+                st.session_state.scenario["util"]["md_99091"] = 0.65  # Standard MD review
+                # Set override flags and force refresh
+                st.session_state.months_override = True
+                st.session_state.growth_override = True
+                st.session_state.attrition_override = True
+                st.session_state.patients_override = True
+                st.session_state.scenario_changed = True
+                st.rerun()
+        
+        with col_timeline:
+            if st.button("📈 On Timeline\n(4 Years)", use_container_width=True, type="primary", key="dash_timeline"):
+                # Standard: Reach 19,965 patients around month 40-48
+                st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 900
+                st.session_state.scenario["settings"]["initial_capture_rate"] = 0.60
+                st.session_state.scenario["settings"]["target_capture_rate"] = 0.95
+                st.session_state.scenario["settings"]["growth_multiplier"] = 1.4
+                st.session_state.scenario["settings"]["monthly_attrition"] = 0.03
+                st.session_state.scenario["settings"]["months"] = 60
+                st.session_state.scenario["settings"]["max_patients"] = 19965
+                # Standard billing utilization
+                st.session_state.scenario["util"]["collection_rate"] = 0.95
+                st.session_state.scenario["util"]["rpm_16day"] = 0.95  # Standard device eligibility
+                st.session_state.scenario["util"]["rpm_20min"] = 0.92  # Standard management
+                st.session_state.scenario["util"]["rpm_40min"] = 0.55  # Standard additional sessions
+                st.session_state.scenario["util"]["ccm_99490"] = 0.75  # Standard CCM
+                st.session_state.scenario["util"]["md_99091"] = 0.65  # Standard MD review
+                # Set override flags and force refresh
+                st.session_state.months_override = True
+                st.session_state.growth_override = True
+                st.session_state.attrition_override = True
+                st.session_state.patients_override = True
+                st.session_state.scenario_changed = True
+                st.rerun()
+                
+        with col_aggr:
+            if st.button("🚀 Aggressive\n(3 Years)", use_container_width=True, type="secondary", key="dash_aggr"):
+                # Aggressive: Reach 19,965 patients around month 28-36
+                st.session_state.scenario["settings"]["hill_valley_monthly_discharges"] = 1100
+                st.session_state.scenario["settings"]["initial_capture_rate"] = 0.70
+                st.session_state.scenario["settings"]["target_capture_rate"] = 0.95
+                st.session_state.scenario["settings"]["growth_multiplier"] = 1.6
+                st.session_state.scenario["settings"]["monthly_attrition"] = 0.025
+                st.session_state.scenario["settings"]["months"] = 60
+                st.session_state.scenario["settings"]["max_patients"] = 19965
+                # Aggressive billing utilization - maximize everything
+                st.session_state.scenario["util"]["collection_rate"] = 0.95
+                st.session_state.scenario["util"]["rpm_16day"] = 0.98  # Max device eligibility
+                st.session_state.scenario["util"]["rpm_20min"] = 0.95  # Max management
+                st.session_state.scenario["util"]["rpm_40min"] = 0.65  # Higher additional sessions
+                st.session_state.scenario["util"]["ccm_99490"] = 0.80  # Higher CCM
+                st.session_state.scenario["util"]["md_99091"] = 0.70  # Higher MD review
+                st.session_state.scenario["settings"]["ai_efficiency_factor"] = 0.85  # Better AI efficiency
+                # Set override flags and force refresh
+                st.session_state.months_override = True
+                st.session_state.growth_override = True
+                st.session_state.attrition_override = True
+                st.session_state.patients_override = True
+                st.session_state.scenario_changed = True
+                st.rerun()
+                
+        with col_reset:
+            if st.button("🔄 Reset to\nManual", use_container_width=True, key="dash_reset"):
+                # Clear override flags
+                for key in ["months_override", "growth_override", "attrition_override", "patients_override"]:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.rerun()
+        
+        # Show which scenario is active
+        if st.session_state.get("scenario_changed"):
+            hv_discharges = st.session_state.scenario["settings"].get("hill_valley_monthly_discharges", 900)
+            if hv_discharges == 700:
+                st.success("✅ Conservative scenario active (5 years to 19,965 patients)")
+            elif hv_discharges == 900:
+                st.success("✅ On Timeline scenario active (4 years to 19,965 patients)")
+            elif hv_discharges == 1100:
+                st.success("✅ Aggressive scenario active (3 years to 19,965 patients)")
+        
+        st.divider()
+        
         # Active States Status & Target Achievement
         active_state_names = list(active_states_config.keys())
         

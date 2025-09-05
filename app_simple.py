@@ -590,7 +590,32 @@ try:
         st.session_state.scenario["settings"]
     )
     
-    # Tabs for different views
+    # Tabs for different views with prominent styling
+    st.markdown("### 📍 Navigate Financial Model")
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 60px;
+        padding-left: 20px;
+        padding-right: 20px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(0, 183, 216, 0.2) !important;
+        border-bottom: 3px solid #00B7D8;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "📈 Analytics", "💰 Valuation", "📋 Data Tables", "📖 Model Overview"])
     
     with tab1:

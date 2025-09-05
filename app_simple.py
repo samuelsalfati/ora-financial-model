@@ -591,7 +591,10 @@ try:
     )
     
     # Tabs for different views
-    # Growth Scenario Buttons - placed prominently at top right
+    # Create tabs first for better navigation
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "📈 Analytics", "💰 Valuation", "📋 Data Tables", "📖 Model Overview"])
+    
+    # Growth Scenario Buttons - below tabs but above content
     st.subheader("🎯 Growth Scenarios")
     st.caption("Select a scenario to override all parameters and reach 19,965 patients at different timelines")
     
@@ -695,8 +698,6 @@ try:
             st.success("✅ Aggressive scenario active (3 years to 19,965 patients)")
     
     st.divider()
-    
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "📈 Analytics", "💰 Valuation", "📋 Data Tables", "📖 Model Overview"])
     
     with tab1:
         # Active States Status & Target Achievement
